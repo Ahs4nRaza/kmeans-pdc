@@ -118,10 +118,7 @@ void calculateKmeansInThread(int *tid){
             cluster_points_sum[current_cluster_id[i - start] * 3 + 2] += (float)global_data_points[i * 3 + 2];
         }
 
-/*
-    Update global_iter_centroids and global_iter_cluster_count after each thread reach
-    (previous global_iter_centroids * global_iter_cluster_count + new sum_cluster) / (new counter_iter + previous cluster_count) 
-*/
+
 #pragma omp critical
         {
             for (int i = 0; i < global_centroids; i++){
@@ -135,12 +132,7 @@ void calculateKmeansInThread(int *tid){
             }
         }
 
-/*
-    Wait for all threads reach this point and execute for first thread only
-    Delta is the sum of squared distance between centroid of previous and current iteration.
-    delta = (iter1_centroid1_x - iter2_centroid1_x)^2 + (iter1_centroid1_y - iter2_centroid1_y)^2 + (iter1_centroid1_z - iter2_centroid1_z)^2 + (iter1_centroid2_x - iter2_centroid2_x)^2 + (iter1_centroid2_y - iter2_centroid2_y)^2 + (iter1_centroid2_z - iter2_centroid2_z)^2
-    Update global_deta with new delta
-*/
+
 #pragma omp barrier
         if (*id == 0){
             double temp_delta = 0.0;
@@ -157,11 +149,11 @@ void calculateKmeansInThread(int *tid){
             global_num_iter++;
         }
 
-// Wait for all thread reach this point and increase counter_iter by 1
+
 #pragma omp barrier
         iter_counter++;
     }
-//End of loop
+
 
 // Assign points to final choice of cluster centroids
     for (int i = start; i < end; i++)
@@ -187,10 +179,7 @@ void kmeansOpenMP(int num_threads, int N, int centroids, int *data_points, int *
     *cluster_id = (int *)malloc(N * 4 * sizeof(int));   //Allocating space of 4 units each for N data points
     global_data_point_cluster = *cluster_id;
 
-    /*
-        Allocating space of 3K units for each iteration
-        Since three dimensional data point and centroids number of clusters 
-    */
+   
     global_iter_centroids = (float *)calloc((MAX_ITERATION + 1) * centroids * 3, sizeof(float));
 
     // Assigning first centroids points to be initial centroids
@@ -206,10 +195,7 @@ void kmeansOpenMP(int num_threads, int N, int centroids, int *data_points, int *
         printf("%f\t%f\t%f\n", global_iter_centroids[i * 3], global_iter_centroids[i * 3 + 1], global_iter_centroids[i * 3 + 2]);
     }
 
-    /*
-        Allocating space for global_iter_cluster_count
-        global_iter_cluster_count keeps the count of number of points in centroids clusters after each iteration
-     */
+   
     global_iter_cluster_count = (int **)malloc(MAX_ITERATION * sizeof(int *));
     for (int i = 0; i < MAX_ITERATION; i++)
     {
@@ -249,7 +235,7 @@ void kmeansOpenMP(int num_threads, int N, int centroids, int *data_points, int *
 int main(int argc, char const *argv[]){
 
 	int N;
-	int num_threads = atoi(argv[1]);		
+	int num_threads = atoi(argv[1]);		// thread counts
     int centroids = atoi(argv[2]);			//number of clusters
     const char *dataset_filename = argv[3];
 	int* data_points;						

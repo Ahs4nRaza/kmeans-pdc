@@ -10,7 +10,6 @@
 
 #define MAX_ITER 1000
 #define THRESHOLD 1e-5
-#define min(a, b) \ ({ __typeof__ (a) _a = (a); \ __typeof__ (b) _b = (b); \ _a < _b ? _a : _b; })
 
 int global_num_points;
 int global_num_iter;
@@ -79,19 +78,14 @@ void find_kmeans(int N, int centroids, int* data_points, int** data_point_cluste
         printf("%f\t%f\t%f\n", global_iter_centroids[i * 3], global_iter_centroids[i * 3 + 1], global_iter_centroids[i * 3 + 2]);
     }
 
-    // Run k-means sequential function
+    
     double min_distance, current_distance;
 
     // Cluster id associated with each point
     int *point_to_cluster_id = (int *)malloc(global_num_points * sizeof(int));
-
-    // Cluster location or centroid (x,y,z) coordinates for K clusters in a iteration
     float *cluster_points_sum = (float *)malloc(global_centroids * 3 * sizeof(float));
-
-    // No. of points in a cluster for a iteration
     int *points_inside_cluster_count = (int *)malloc(global_centroids * sizeof(int));
 
-    // Start of loop
     int iter_counter = 0;
     double temp_delta = 0.0;
     while ((global_deta > THRESHOLD) && (iter_counter < MAX_ITER)){
@@ -116,16 +110,13 @@ void find_kmeans(int N, int centroids, int* data_points, int** data_point_cluste
                 }
             }
 
-             //Update local count of number of points inside cluster
             points_inside_cluster_count[point_to_cluster_id[i]] += 1;
 
-            // Update local sum of cluster data points
             cluster_points_sum[point_to_cluster_id[i] * 3] += (float)global_data_points[i * 3];
             cluster_points_sum[point_to_cluster_id[i] * 3 + 1] += (float)global_data_points[i * 3 + 1];
             cluster_points_sum[point_to_cluster_id[i] * 3 + 2] += (float)global_data_points[i * 3 + 2];
         }
 
-        //Compute centroid from cluster_points_sum and store inside global_iter_centroids in a iteration
         for (int i = 0; i < global_centroids; i++){
             assert(points_inside_cluster_count[i] != 0);
             global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3] = cluster_points_sum[i * 3] / points_inside_cluster_count[i];
@@ -133,12 +124,7 @@ void find_kmeans(int N, int centroids, int* data_points, int** data_point_cluste
             global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3 + 2] = cluster_points_sum[i * 3 + 2] / points_inside_cluster_count[i];
         }
 
-    /*
-        Delta is the sum of squared distance between centroid of previous and current iteration.
-        Supporting formula is:
-            delta = (iter1_centroid1_x - iter2_centroid1_x)^2 + (iter1_centroid1_y - iter2_centroid1_y)^2 + (iter1_centroid1_z - iter2_centroid1_z)^2 + (iter1_centroid2_x - iter2_centroid2_x)^2 + (iter1_centroid2_y - iter2_centroid2_y)^2 + (iter1_centroid2_z - iter2_centroid2_z)^2
-        Update global_deta with new delta
-    */
+   
         temp_delta = 0.0;
         for (int i = 0; i < global_centroids; i++){
             temp_delta += (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3]) * (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3]) + (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3 + 1] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3 + 1]) * (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3 + 1] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3 + 1]) + (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3 + 2] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3 + 2]) * (global_iter_centroids[((iter_counter + 1) * global_centroids + i) * 3 + 2] - global_iter_centroids[((iter_counter)*global_centroids + i) * 3 + 2]);
@@ -148,10 +134,9 @@ void find_kmeans(int N, int centroids, int* data_points, int** data_point_cluste
         iter_counter++;
     }
 
-    // Store the number of iterations performed in global variable
+   
     global_num_iter = iter_counter;
 
-    // Assign points to final choice for cluster centroids
     for (int i = 0; i < global_num_points; i++){
         // Assign points to clusters
         global_data_point_cluster[i * 4] = global_data_points[i * 3];
@@ -186,9 +171,9 @@ int main(int argc, char const *argv[]){
 	int centroids = atoi(argv[1]);          //number of clusters
     const char *dataset_filename = argv[2];
 	int* data_points;		//Data points (input)
-	int* cluster_points;	//clustered data points (to be computed)
-	float* centroids_iteration;		//centroids of each iteration (to be computed)
-	int num_iterations;     //no of iterations performed by algo (to be computed)
+	int* cluster_points;	
+	float* centroids_iteration;		
+	int num_iterations;     
     double start_time, end_time;
     double executed_time;
 	//---------------------------------------------------------------------//
